@@ -7,6 +7,8 @@ Detects seven indoor object classes — `chair`, `clock`, `exit`, `fireextinguis
 Built with Python 3.11 and PyTorch 2.6. Training runs on Google Colab; the
 repository also runs end to end on a local GPU.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zaiter93/indoor-object-detection/blob/master/notebooks/colab_train_eval.ipynb)
+
 ---
 
 ## Results
