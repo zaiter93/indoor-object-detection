@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-REPO_URL = "https://github.com/YOUR_USERNAME/indoor-object-detection"
+REPO_URL = "https://github.com/zaiter93/indoor-object-detection"
 NOTEBOOK_PATH = Path(__file__).resolve().parents[1] / "notebooks" / "colab_train_eval.ipynb"
 
 
@@ -73,7 +73,8 @@ CELLS = [
     markdown(
         "### Get the code",
         "",
-        "Replace `REPO_URL` with your fork before running.",
+        "Clones the public repository. Change `REPO_URL` only if you are running "
+        "from a fork.",
     ),
     code(
         "import os",
@@ -99,16 +100,15 @@ CELLS = [
     markdown(
         "### Get the dataset",
         "",
-        "The dataset is ~400 MB, which is too large for a normal git repository. "
-        "Pick whichever route you set up:",
+        "The dataset is ~400 MB, too large for a normal git repository, so it is "
+        "attached to a GitHub Release. `DATASET_URL` below already points at it — "
+        "no setup needed, the next cell just downloads and unzips it.",
         "",
-        "* **GitHub Release** (recommended — fully reproducible for a reviewer): "
-        "attach `Indoor Object Detection Dataset.zip` to a release and paste the "
-        "asset URL below.",
-        "* **Google Drive**: upload the zip to your Drive and mount it.",
+        "Clearing `DATASET_URL` falls back to mounting Google Drive, if you would "
+        "rather supply your own copy.",
     ),
     code(
-        "DATASET_URL = \"\"  # e.g. https://github.com/<user>/<repo>/releases/download/v1.0/dataset.zip",
+        "DATASET_URL = \"https://github.com/zaiter93/indoor-object-detection/releases/download/v1.0-dataset/indoor-object-detection-dataset.zip\"",
         'RAW_DIR = Path("data/raw")',
         "RAW_DIR.mkdir(parents=True, exist_ok=True)",
         "",
