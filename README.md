@@ -190,7 +190,7 @@ images the extra compute is affordable.
 
 Chosen from what the scenes physically permit, not from a default list:
 
-- **`mosaic: 1.0`, disabled for the last 15 epochs.** The highest-value
+- **`mosaic: 1.0`, disabled for the last 20 epochs.** The highest-value
   augmentation here: composing four frames multiplies effective exposure to
   rare classes and creates scale/context combinations the six sequences never
   contain. Turning it off at the end lets the model finish on the real image
@@ -210,12 +210,21 @@ Chosen from what the scenes physically permit, not from a default list:
 
 ### Optimisation
 
-AdamW, `lr0=1e-3`, cosine decay, 3 warm-up epochs, 150 epochs with
-`patience=30`. At ~110 iterations per epoch with a pretrained backbone, AdamW's
+AdamW, `lr0=1e-3`, cosine decay, 3 warm-up epochs, 120 epochs with
+`patience=40`. At ~110 iterations per epoch with a pretrained backbone, AdamW's
 per-parameter scaling converges in far fewer epochs than SGD+momentum, which
 would need careful LR tuning to match. Warm-up protects the pretrained weights
 from the randomly-initialised head's first gradients; cosine decay matters
 because the final epochs run without mosaic.
+
+The epoch count and patience are chosen together rather than independently.
+Mosaic is disabled at a *fixed* epoch (`epochs - close_mosaic` = 100), and the
+early-stopper has no knowledge of that boundary, so a short patience can end the
+run at ~epoch 95 — immediately before the no-mosaic phase that contributes much
+of the final mAP. `patience: 40` against a 20-epoch tail makes reaching epoch 100
+reliable. The schedule is also sized to *complete*: cosine decay only anneals to
+`lr0 * lrf` if the last epoch is reached, so an early stop partway through a
+longer schedule leaves the learning rate high and the weights under-converged.
 
 ### Loss
 

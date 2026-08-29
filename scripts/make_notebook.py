@@ -169,7 +169,7 @@ CELLS = [
         "to ~27 px; 960 keeps them near 41 px. |",
         "| optimizer | AdamW, lr 1e-3, cosine | Converges in far fewer epochs than "
         "SGD on ~110 iterations/epoch with a pretrained backbone. |",
-        "| mosaic | 1.0, off for last 15 epochs | Multiplies effective exposure to rare "
+        "| mosaic | 1.0, off for last 20 epochs | Multiplies effective exposure to rare "
         "classes; disabled at the end so training finishes on the real distribution. |",
         "| flipud | 0.0 | These scenes are gravity-aligned — an upside-down exit sign "
         "cannot occur at inference time. |",

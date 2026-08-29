@@ -37,3 +37,6 @@ submission.zip
 reports/metrics.json
 reports/results.md
 reports/figures/qualitative_*.png
+
+# Configs generated at runtime (ablation variants, ad-hoc checks)
+configs/_*.yaml

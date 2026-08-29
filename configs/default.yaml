@@ -12,10 +12,20 @@ model: yolo11s.pt          # COCO-pretrained. 's' over 'n': 1.8k training images
                            # Over 'm'/'l': more capacity would overfit 1.8k
                            # frames from only six rooms.
 
-epochs: 150                # Small dataset -> many passes needed. Guarded by
-                           # `patience`, so this is an upper bound, not a target.
-patience: 30               # Early-stop when val fitness plateaus for 30 epochs.
-batch: 16
+epochs: 120                # Small dataset -> many passes needed. Sized so the
+                           # run normally *completes* rather than being cut off:
+                           # the cosine schedule only anneals to lr0*lrf if the
+                           # last epoch is reached, and an early stop at epoch
+                           # 110 of a 150-epoch schedule leaves the LR high.
+patience: 40               # Deliberately larger than the 20-epoch no-mosaic tail
+                           # below. Mosaic closes at a FIXED epoch
+                           # (epochs - close_mosaic = 100; see trainer.py), and
+                           # the early-stopper knows nothing about it. With a
+                           # short patience the run can stop at ~epoch 95 --
+                           # just before the phase that produces much of the
+                           # final mAP. 40 makes reaching epoch 100 reliable.
+batch: 16                  # Fits an L4 (24 GB) at imgsz 960 with room to spare.
+                           # On a 16 GB T4 use batch: 8.
 imgsz: 960                 # Source frames are 1280x720. At the usual 640 the
                            # effective scale is 0.5x, which pushes the smallest
                            # 5% of boxes (~55 px) down to ~27 px. 960 keeps them
@@ -54,10 +64,12 @@ mosaic: 1.0                # The single most valuable augmentation here: it
                            # composes 4 frames, so rare classes (printer: 43
                            # train boxes) appear far more often per batch and in
                            # novel context/scale combinations.
-close_mosaic: 15           # Disable mosaic for the final 15 epochs so the model
+close_mosaic: 20           # Disable mosaic for the final 20 epochs so the model
                            # finishes on the real image distribution it will be
                            # evaluated on. Training to the end with mosaic
                            # leaves a train/test domain gap.
+                           # Paired with `patience: 40` above -- this phase is
+                           # only useful if training actually reaches epoch 100.
 mixup: 0.0                 # Blended images produce ambiguous box targets; on a
                            # small localisation-sensitive set it hurts.
 
