@@ -1,0 +1,120 @@
+{
+  "grouped_selection": {
+    "block_size": 40,
+    "seed": 1,
+    "worst_class_support": 12,
+    "max_ratio_deviation": 0.0096,
+    "median_frame_gap": {
+      "val": 12.0,
+      "test": 13.0
+    },
+    "candidates_considered": 80,
+    "candidates_feasible": 29
+  },
+  "grouped": {
+    "splits": {
+      "train": {
+        "images": 1784,
+        "fraction": 0.8061,
+        "boxes": 3682,
+        "per_class": {
+          "chair": 1382,
+          "clock": 235,
+          "exit": 452,
+          "fireextinguisher": 1302,
+          "printer": 43,
+          "screen": 68,
+          "trashbin": 200
+        },
+        "missing_classes": []
+      },
+      "val": {
+        "images": 200,
+        "fraction": 0.0904,
+        "boxes": 522,
+        "per_class": {
+          "chair": 188,
+          "clock": 20,
+          "exit": 57,
+          "fireextinguisher": 207,
+          "printer": 19,
+          "screen": 15,
+          "trashbin": 16
+        },
+        "missing_classes": []
+      },
+      "test": {
+        "images": 229,
+        "fraction": 0.1035,
+        "boxes": 390,
+        "per_class": {
+          "chair": 91,
+          "clock": 25,
+          "exit": 36,
+          "fireextinguisher": 175,
+          "printer": 19,
+          "screen": 32,
+          "trashbin": 12
+        },
+        "missing_classes": []
+      }
+    },
+    "leakage_median_frame_gap": {
+      "val": 12.0,
+      "test": 13.0
+    }
+  },
+  "random": {
+    "splits": {
+      "train": {
+        "images": 1770,
+        "fraction": 0.7998,
+        "boxes": 3665,
+        "per_class": {
+          "chair": 1309,
+          "clock": 224,
+          "exit": 427,
+          "fireextinguisher": 1374,
+          "printer": 65,
+          "screen": 93,
+          "trashbin": 173
+        },
+        "missing_classes": []
+      },
+      "val": {
+        "images": 221,
+        "fraction": 0.0999,
+        "boxes": 455,
+        "per_class": {
+          "chair": 151,
+          "clock": 29,
+          "exit": 65,
+          "fireextinguisher": 169,
+          "printer": 6,
+          "screen": 13,
+          "trashbin": 22
+        },
+        "missing_classes": []
+      },
+      "test": {
+        "images": 222,
+        "fraction": 0.1003,
+        "boxes": 474,
+        "per_class": {
+          "chair": 201,
+          "clock": 27,
+          "exit": 53,
+          "fireextinguisher": 141,
+          "printer": 10,
+          "screen": 9,
+          "trashbin": 33
+        },
+        "missing_classes": []
+      }
+    },
+    "leakage_median_frame_gap": {
+      "val": 1.0,
+      "test": 1.0
+    }
+  }
+}

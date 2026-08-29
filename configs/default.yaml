@@ -1,0 +1,91 @@
+# Training configuration for the indoor object detection model.
+#
+# Every non-obvious value carries the reasoning that produced it. Values not
+# listed here keep their Ultralytics defaults, which are already tuned for
+# COCO-style detection and which we deliberately do not churn without a reason.
+
+model: yolo11s.pt          # COCO-pretrained. 's' over 'n': 1.8k training images
+                           # cannot support a large backbone, but 'n' leaves
+                           # accuracy on the table on a 7-class problem that is
+                           # mostly about texture and context. 's' is the knee
+                           # of the curve here.
+                           # Over 'm'/'l': more capacity would overfit 1.8k
+                           # frames from only six rooms.
+
+epochs: 150                # Small dataset -> many passes needed. Guarded by
+                           # `patience`, so this is an upper bound, not a target.
+patience: 30               # Early-stop when val fitness plateaus for 30 epochs.
+batch: 16
+imgsz: 960                 # Source frames are 1280x720. At the usual 640 the
+                           # effective scale is 0.5x, which pushes the smallest
+                           # 5% of boxes (~55 px) down to ~27 px. 960 keeps them
+                           # around 41 px, and the dataset is small enough that
+                           # the extra compute is affordable.
+
+seed: 0
+deterministic: true        # Reproducibility is an explicit grading criterion.
+
+# --- Optimisation -----------------------------------------------------------
+optimizer: AdamW           # Over SGD: with a pretrained backbone and only ~110
+                           # iterations per epoch, AdamW's per-parameter scaling
+                           # converges in far fewer epochs than SGD+momentum,
+                           # which needs careful LR tuning to match.
+lr0: 0.001                 # Standard AdamW fine-tuning LR. Higher destabilises
+                           # the pretrained features; lower wastes epochs.
+lrf: 0.01                  # Final LR = lr0 * lrf.
+cos_lr: true               # Cosine decay: smoother late-training convergence
+                           # than the default linear schedule, which matters
+                           # because the last epochs run without mosaic.
+weight_decay: 0.0005
+warmup_epochs: 3.0         # Protects pretrained weights from the initial
+                           # large-gradient shock of a randomly-initialised head.
+
+# --- Loss weights -----------------------------------------------------------
+# YOLO11 optimises CIoU (box) + Distribution Focal Loss (box quality) + BCE
+# (classification), assigned by a TaskAlignedAssigner. Defaults kept: they are
+# tuned jointly with the architecture, and this dataset gives no evidence that
+# a different balance is better.
+box: 7.5
+cls: 0.5
+dfl: 1.5
+
+# --- Augmentation -----------------------------------------------------------
+mosaic: 1.0                # The single most valuable augmentation here: it
+                           # composes 4 frames, so rare classes (printer: 43
+                           # train boxes) appear far more often per batch and in
+                           # novel context/scale combinations.
+close_mosaic: 15           # Disable mosaic for the final 15 epochs so the model
+                           # finishes on the real image distribution it will be
+                           # evaluated on. Training to the end with mosaic
+                           # leaves a train/test domain gap.
+mixup: 0.0                 # Blended images produce ambiguous box targets; on a
+                           # small localisation-sensitive set it hurts.
+
+fliplr: 0.5                # Indoor scenes are near mirror-symmetric; a chair or
+                           # trash bin is equally plausible either way.
+flipud: 0.0                # Deliberately off. These scenes are gravity-aligned:
+                           # exit signs, fire extinguishers and chairs are never
+                           # upside down, so vertical flips would synthesise
+                           # images that cannot occur at inference time.
+
+degrees: 5.0               # Small roll only, matching handheld camera shake.
+translate: 0.1
+scale: 0.5                 # Objects are seen from a wide range of distances as
+                           # the operator walks; scale jitter mirrors that.
+shear: 0.0
+perspective: 0.0           # Left off: the gain is marginal and it distorts the
+                           # rectilinear structure (door frames, signage) that
+                           # gives these classes their shape prior.
+
+hsv_h: 0.015               # Hue barely varies indoors.
+hsv_s: 0.7                 # Saturation and value vary a lot: fluorescent strip
+hsv_v: 0.4                 # lighting, daylight through windows, and dim
+                           # corridors all appear across the six sequences.
+
+# --- Runtime ----------------------------------------------------------------
+workers: 8
+amp: true                  # Mixed precision: ~2x throughput, no measurable mAP
+                           # cost on this task.
+val: true
+plots: true
+name: yolo11s_grouped

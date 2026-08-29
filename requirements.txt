@@ -1,0 +1,35 @@
+# Minimal dependency set. Every entry is imported directly by this project;
+# nothing is listed "just in case".
+
+# --- Core --------------------------------------------------------------------
+# PyTorch 2+ is required by the brief and is the training/inference backend.
+torch>=2.2,<3
+torchvision>=0.17,<1
+
+# --- Detector ----------------------------------------------------------------
+# Supplies the YOLO11 architecture, its COCO-pretrained weights, the training
+# loop, and the mosaic/HSV/affine augmentation pipeline. One dependency in place
+# of several thousand lines of model, assigner, loss and augmentation code.
+ultralytics>=8.3,<9
+
+# --- Metrics -----------------------------------------------------------------
+# The reference COCO mAP implementation. Used instead of the trainer's internal
+# validator so the reported numbers are framework-independent and comparable to
+# published COCO results.
+pycocotools>=2.0.7
+
+# --- Figures -----------------------------------------------------------------
+# EDA plots and the good/bad qualitative grids.
+matplotlib>=3.8
+
+# --- Utilities ---------------------------------------------------------------
+# numpy: array maths in evaluation and analysis.
+# PyYAML: reads the training configs in configs/.
+# opencv-python: image I/O and box rendering in inference.py.
+# pillow: image loading for the matplotlib qualitative figures.
+# The last two ship with ultralytics, but are listed because this code imports
+# them directly rather than relying on a transitive dependency.
+numpy>=1.26
+PyYAML>=6.0
+opencv-python>=4.9
+pillow>=10.0

@@ -1,0 +1,108 @@
+{
+  "images": 2213,
+  "boxes": 4594,
+  "empty_images": 6,
+  "class_counts": {
+    "chair": 1661,
+    "clock": 280,
+    "exit": 545,
+    "fireextinguisher": 1684,
+    "printer": 81,
+    "screen": 115,
+    "trashbin": 228
+  },
+  "imbalance_ratio": 20.8,
+  "per_sequence": {
+    "1": {
+      "exit": 67,
+      "fireextinguisher": 57,
+      "trashbin": 4,
+      "clock": 31,
+      "chair": 82
+    },
+    "2": {
+      "exit": 59,
+      "fireextinguisher": 53,
+      "clock": 25,
+      "trashbin": 51,
+      "chair": 127,
+      "screen": 8,
+      "printer": 23
+    },
+    "3": {
+      "chair": 1301,
+      "trashbin": 114,
+      "printer": 57,
+      "exit": 156,
+      "fireextinguisher": 965,
+      "screen": 11,
+      "clock": 80
+    },
+    "4": {
+      "exit": 52,
+      "fireextinguisher": 183,
+      "screen": 52,
+      "clock": 41,
+      "trashbin": 44,
+      "chair": 66
+    },
+    "5": {
+      "fireextinguisher": 309,
+      "exit": 76,
+      "chair": 26,
+      "clock": 16,
+      "trashbin": 7,
+      "screen": 32
+    },
+    "6": {
+      "chair": 59,
+      "exit": 135,
+      "printer": 1,
+      "fireextinguisher": 117,
+      "clock": 87,
+      "screen": 12,
+      "trashbin": 8
+    }
+  },
+  "boxes_per_image": {
+    "mean": 2.08,
+    "max": 6
+  },
+  "box_sqrt_area_px": {
+    "p5": 55.0,
+    "p25": 94.1,
+    "p50": 151.0,
+    "p75": 296.2,
+    "p95": 508.7
+  },
+  "coco_size_bands": {
+    "small(<32)": 10,
+    "medium(32-96)": 1195,
+    "large(>=96)": 3389
+  },
+  "aspect_ratio_w_over_h": {
+    "p10": 0.48,
+    "p50": 0.83,
+    "p90": 1.2
+  },
+  "temporal_redundancy_median_iou": {
+    "1": 0.6819181326262551,
+    "2": 0.5157666420474443,
+    "3": 0.4049031438016979,
+    "5": 0.23179380209387013,
+    "8": 0.08672212174724114,
+    "10": 0.03115264797507788,
+    "15": 0.0,
+    "20": 0.0,
+    "30": 0.0,
+    "50": 0.0,
+    "100": 0.0
+  },
+  "figures": [
+    "class_distribution.png",
+    "per_sequence_heatmap.png",
+    "box_sizes.png",
+    "spatial_heatmap.png",
+    "temporal_redundancy.png"
+  ]
+}

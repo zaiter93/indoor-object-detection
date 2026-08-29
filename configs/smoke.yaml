@@ -1,0 +1,49 @@
+# Local smoke-test configuration.
+#
+# Purpose: prove the pipeline executes end to end -- data build, dataloader,
+# loss, checkpointing, COCO evaluation, inference CLI -- on a 2 GB GTX 1050.
+# It is NOT expected to produce a usable model, and its metrics are meaningless.
+# Real training uses configs/default.yaml on a Colab GPU.
+
+model: yolo11n.pt          # Smallest variant; 's' will not fit alongside
+                           # activations in 2 GB.
+epochs: 2
+patience: 100
+batch: 2                   # 2 GB VRAM leaves almost no room for activations.
+imgsz: 416                 # Quadratic memory cost; 416 is the largest that fits
+                           # reliably at batch 2 with AMP.
+fraction: 0.05             # ~90 training images: enough to exercise every code
+                           # path, fast enough to iterate on.
+
+seed: 0
+deterministic: true
+
+optimizer: AdamW
+lr0: 0.001
+lrf: 0.01
+cos_lr: true
+weight_decay: 0.0005
+warmup_epochs: 0.0         # Pointless across 2 epochs.
+
+box: 7.5
+cls: 0.5
+dfl: 1.5
+
+mosaic: 1.0
+close_mosaic: 0            # Would otherwise consume both epochs.
+mixup: 0.0
+fliplr: 0.5
+flipud: 0.0
+degrees: 5.0
+translate: 0.1
+scale: 0.5
+hsv_h: 0.015
+hsv_s: 0.7
+hsv_v: 0.4
+
+workers: 2                 # Windows spawns processes; high worker counts add
+                           # startup cost without helping at batch 2.
+amp: true
+val: true
+plots: false               # Skip plot rendering to keep the smoke test quick.
+name: smoke
