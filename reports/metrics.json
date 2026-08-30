@@ -1,0 +1,225 @@
+{
+  "config": {
+    "model": "yolo11s.pt",
+    "epochs": 60,
+    "patience": 40,
+    "batch": 16,
+    "imgsz": 960,
+    "seed": 0,
+    "deterministic": true,
+    "optimizer": "AdamW",
+    "lr0": 0.001,
+    "lrf": 0.01,
+    "cos_lr": true,
+    "weight_decay": 0.0005,
+    "warmup_epochs": 3.0,
+    "box": 7.5,
+    "cls": 0.5,
+    "dfl": 1.5,
+    "mosaic": 1.0,
+    "close_mosaic": 10,
+    "mixup": 0.0,
+    "fliplr": 0.5,
+    "flipud": 0.0,
+    "degrees": 5.0,
+    "translate": 0.1,
+    "scale": 0.5,
+    "shear": 0.0,
+    "perspective": 0.0,
+    "hsv_h": 0.015,
+    "hsv_s": 0.7,
+    "hsv_v": 0.4,
+    "workers": 8,
+    "amp": true,
+    "val": true,
+    "plots": true,
+    "name": "yolo11s_grouped"
+  },
+  "dataset": "grouped",
+  "splits": {
+    "val": {
+      "overall": {
+        "mAP@50-95": 0.7308964211194037,
+        "mAP@50": 0.9492790414240149,
+        "mAP@75": 0.8377026197060303,
+        "mAP_small": -1.0,
+        "mAP_medium": 0.6565105671987437,
+        "mAP_large": 0.7801416218491257,
+        "AR@1": 0.6213878996751825,
+        "AR@10": 0.7802622788083375,
+        "AR@100": 0.7802622788083375,
+        "AR_small": -1.0,
+        "AR_medium": 0.6819047619047619,
+        "AR_large": 0.8284835153648146
+      },
+      "per_class": {
+        "chair": {
+          "AP@50-95": 0.9076224835141595,
+          "AP@50": 0.999183367500199
+        },
+        "clock": {
+          "AP@50-95": 0.7491209120912091,
+          "AP@50": 0.931188118811881
+        },
+        "exit": {
+          "AP@50-95": 0.7502669405203473,
+          "AP@50": 0.9980198019801981
+        },
+        "fireextinguisher": {
+          "AP@50-95": 0.7681838690373212,
+          "AP@50": 0.9967146041595928
+        },
+        "printer": {
+          "AP@50-95": 0.6495279776424848,
+          "AP@50": 0.9210312335581383
+        },
+        "screen": {
+          "AP@50-95": 0.6415082264528974,
+          "AP@50": 0.9092686579582328
+        },
+        "trashbin": {
+          "AP@50-95": 0.6500445385774067,
+          "AP@50": 0.8895475059998625
+        }
+      },
+      "num_predictions": 1278,
+      "instances": {
+        "chair": 188,
+        "clock": 20,
+        "exit": 57,
+        "fireextinguisher": 207,
+        "printer": 19,
+        "screen": 15,
+        "trashbin": 16
+      },
+      "images": 200
+    },
+    "test": {
+      "overall": {
+        "mAP@50-95": 0.6620182717545021,
+        "mAP@50": 0.8635697770281439,
+        "mAP@75": 0.7784592410627686,
+        "mAP_small": -1.0,
+        "mAP_medium": 0.6218137808664849,
+        "mAP_large": 0.6779643001440165,
+        "AR@1": 0.5716126557235581,
+        "AR@10": 0.7184824446647754,
+        "AR@100": 0.7184824446647754,
+        "AR_small": -1.0,
+        "AR_medium": 0.7123062015503876,
+        "AR_large": 0.7303082537762989
+      },
+      "per_class": {
+        "chair": {
+          "AP@50-95": 0.6507466465106274,
+          "AP@50": 0.9108009967552286
+        },
+        "clock": {
+          "AP@50-95": 0.8074785478547855,
+          "AP@50": 1.0
+        },
+        "exit": {
+          "AP@50-95": 0.8471323203748947,
+          "AP@50": 1.0
+        },
+        "fireextinguisher": {
+          "AP@50-95": 0.817901008853902,
+          "AP@50": 0.995691631285648
+        },
+        "printer": {
+          "AP@50-95": 0.46812257002097724,
+          "AP@50": 0.6592306746202571
+        },
+        "screen": {
+          "AP@50-95": 0.45039604727439997,
+          "AP@50": 0.6017247509183639
+        },
+        "trashbin": {
+          "AP@50-95": 0.5923507613919288,
+          "AP@50": 0.8775403856175091
+        }
+      },
+      "num_predictions": 1475,
+      "instances": {
+        "chair": 91,
+        "clock": 25,
+        "exit": 36,
+        "fireextinguisher": 175,
+        "printer": 19,
+        "screen": 32,
+        "trashbin": 12
+      },
+      "images": 229
+    }
+  },
+  "qualitative": {
+    "confidence_threshold": 0.25,
+    "images_scored": 200,
+    "mean_f1": 0.922,
+    "error_totals": {
+      "missed object (FN)": 18,
+      "false positive (FP)": 38,
+      "  of which wrong class": 0,
+      "  of which loose box": 1,
+      "true positive (TP)": 504
+    },
+    "good_examples": [
+      {
+        "file": "frame_s3_521.jpg",
+        "f1": 1.0
+      },
+      {
+        "file": "frame_s3_536.jpg",
+        "f1": 1.0
+      },
+      {
+        "file": "frame_s3_551.jpg",
+        "f1": 1.0
+      },
+      {
+        "file": "frame_s3_850.jpg",
+        "f1": 1.0
+      },
+      {
+        "file": "frame_s3_865.jpg",
+        "f1": 1.0
+      },
+      {
+        "file": "frame_s3_880.jpg",
+        "f1": 1.0
+      }
+    ],
+    "bad_examples": [
+      {
+        "file": "frame_s3_841.jpg",
+        "f1": 0.0,
+        "cause": "false positive"
+      },
+      {
+        "file": "frame_s4_187.jpg",
+        "f1": 0.0,
+        "cause": "missed object"
+      },
+      {
+        "file": "frame_s3_879.jpg",
+        "f1": 0.0,
+        "cause": "missed object"
+      },
+      {
+        "file": "frame_s4_172.jpg",
+        "f1": 0.667,
+        "cause": "false positive"
+      },
+      {
+        "file": "frame_s3_966.jpg",
+        "f1": 0.75,
+        "cause": "false positive"
+      },
+      {
+        "file": "frame_s5_133.jpg",
+        "f1": 0.8,
+        "cause": "false positive"
+      }
+    ]
+  }
+}
