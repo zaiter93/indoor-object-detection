@@ -39,13 +39,21 @@ validation set:
 | *inflation from leakage* | *+0.0336* | *+0.0860* |
 
 A naive random split reports **8.6 points more mAP@50-95** for a model that is
-no better — that gap is memorised near-duplicate frames, and it would not
-survive a hidden test set.
+no better. That gap is memorised near-duplicate frames: it measures recall of
+images the model already saw, and it would evaporate the first time the model
+walked into a room it had not been trained on.
 
 The inflation being roughly 2.5× larger at the stricter IoU range is the
 signature of the effect: having already seen a near-identical frame helps most
 with placing the box *precisely*, which is exactly what mAP@50-95 rewards and
 mAP@50 largely forgives.
+
+**This choice costs reported accuracy, deliberately.** Splitting this dataset
+randomly would let me report 0.8169 instead of 0.7309 for the same model, from
+the same data, with a defensible-looking 80/10/10. Both rows above come from
+this repository precisely so the trade is visible rather than hidden: the lower
+number is the one that describes the model, and a metric you cannot trust is
+worth less than a lower metric you can.
 
 ---
 
@@ -152,9 +160,14 @@ match *n* frames later.
 
 Consecutive frames are the same picture. A uniformly random 80/10/10 split
 leaves a **median gap of 1 frame** between each validation image and its nearest
-training image — the model is scored on views it has already memorised. The
-reported mAP would be inflated and would not survive the hidden test set that
-this submission is actually graded on.
+training image — the model is scored on views it has already memorised.
+
+The number such a split produces does not answer the question a detection metric
+is supposed to answer. "Can this model find fire extinguishers?" and "can this
+model recall a frame it saw 1/30 s earlier?" are different questions, and a
+leaky split silently substitutes the second for the first. Since the point of
+the model is to work in rooms it has not seen, the leak-free number is the only
+one that means anything — and it is the one reported here.
 
 **The split used here** cuts each sequence into contiguous 40-frame blocks and
 assigns whole blocks, so near-duplicates never straddle a boundary. Median gap
