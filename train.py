@@ -53,6 +53,14 @@ def parse_args() -> argparse.Namespace:
                         help="'0', 'cpu', ... Defaults to Ultralytics auto-detection.")
     parser.add_argument("--eval-imgsz", type=int, default=None,
                         help="inference size for evaluation; defaults to the training imgsz")
+    parser.add_argument("--tag", default=None,
+                        help="Marks this as a SECONDARY run (e.g. the leakage ablation). "
+                             "Its outputs are suffixed -- weights/best_<tag>.pt, "
+                             "reports/metrics_<tag>.json, reports/results_<tag>.md -- and it "
+                             "does not render the qualitative figures. Without it, a second "
+                             "run silently overwrites the primary model, its report and its "
+                             "figures, leaving the shipped checkpoint inconsistent with the "
+                             "reported metrics.")
     parser.add_argument("--skip-eval", action="store_true",
                         help="train only, skip COCO evaluation and figures")
     return parser.parse_args()
@@ -190,8 +198,12 @@ def main() -> int:
 
     # Ultralytics writes best.pt under <project>/<name>/weights/.
     best = Path(results.save_dir) / "weights" / "best.pt"
-    WEIGHTS_DIR.mkdir(parents=True, exist_ok=True)
-    final_weights = WEIGHTS_DIR / "best.pt"
+    # Secondary runs (the leakage ablation) must not overwrite the checkpoint
+    # that inference.py and the submission ship, or the artefact stops matching
+    # the metrics reported for it.
+    suffix = f"_{args.tag}" if args.tag else ""
+    final_weights = WEIGHTS_DIR / f"best{suffix}.pt"
+    final_weights.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(best, final_weights)
     print(f"[train] best checkpoint -> {final_weights}")
 
@@ -221,25 +233,32 @@ def main() -> int:
         print(format_metrics(metrics, metrics["instances"]))
         print()
 
-    print("[eval] rendering qualitative examples ...")
-    val_records = {
-        name: record for name, record in records_by_file.items()
-        if (dataset_dir / "images" / "val" / name).exists()
-    }
-    qualitative = render_examples(
-        val_records, val_detections,
-        image_dir=dataset_dir / "images" / "val",
-        out_dir=FIGURES_DIR,
-        conf=CONF_DISPLAY,
-    )
+    qualitative = None
+    if args.tag:
+        print("[eval] secondary run (--tag): skipping qualitative figures so the "
+              "primary model keeps ownership of them.")
+    else:
+        print("[eval] rendering qualitative examples ...")
+        val_records = {
+            name: record for name, record in records_by_file.items()
+            if (dataset_dir / "images" / "val" / name).exists()
+        }
+        qualitative = render_examples(
+            val_records, val_detections,
+            image_dir=dataset_dir / "images" / "val",
+            out_dir=FIGURES_DIR,
+            conf=CONF_DISPLAY,
+        )
 
-    (REPORTS_DIR / "metrics.json").write_text(
+    metrics_path = REPORTS_DIR / f"metrics{suffix}.json"
+    metrics_path.write_text(
         json.dumps({"config": config, "dataset": args.dataset,
                     "splits": metrics_by_split, "qualitative": qualitative}, indent=2),
         encoding="utf-8",
     )
-    write_report(metrics_by_split, qualitative, config, args.dataset, REPORTS_DIR / "results.md")
-    print(f"[eval] wrote {REPORTS_DIR / 'results.md'} and {REPORTS_DIR / 'metrics.json'}")
+    report_path = REPORTS_DIR / f"results{suffix}.md"
+    write_report(metrics_by_split, qualitative, config, args.dataset, report_path)
+    print(f"[eval] wrote {report_path} and {metrics_path}")
     return 0
 
 

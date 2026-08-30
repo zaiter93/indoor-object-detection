@@ -26,6 +26,27 @@ of the training framework's own validation loop.
 > validation instances and is correspondingly noisy. The whole-set mAP is the
 > more stable number.
 
+### Leakage ablation
+
+Identical configuration, identical schedule, identical seed — the *only*
+difference is which split the model trained on. Both evaluated on their own
+validation set:
+
+| split | val mAP@50 | val mAP@50-95 |
+|---|---:|---:|
+| **grouped** (leak-free, reported) | **0.9493** | **0.7309** |
+| random (naive) | 0.9829 | 0.8169 |
+| *inflation from leakage* | *+0.0336* | *+0.0860* |
+
+A naive random split reports **8.6 points more mAP@50-95** for a model that is
+no better — that gap is memorised near-duplicate frames, and it would not
+survive a hidden test set.
+
+The inflation being roughly 2.5× larger at the stricter IoU range is the
+signature of the effect: having already seen a near-identical frame helps most
+with placing the box *precisely*, which is exactly what mAP@50-95 rewards and
+mAP@50 largely forgives.
+
 ---
 
 ## Setup
@@ -217,14 +238,27 @@ would need careful LR tuning to match. Warm-up protects the pretrained weights
 from the randomly-initialised head's first gradients; cosine decay matters
 because the final epochs run without mosaic.
 
-The epoch count and patience are chosen together rather than independently.
-Mosaic is disabled at a *fixed* epoch (`epochs - close_mosaic` = 100), and the
-early-stopper has no knowledge of that boundary, so a short patience can end the
-run at ~epoch 95 — immediately before the no-mosaic phase that contributes much
-of the final mAP. `patience: 40` against a 20-epoch tail makes reaching epoch 100
-reliable. The schedule is also sized to *complete*: cosine decay only anneals to
-`lr0 * lrf` if the last epoch is reached, so an early stop partway through a
-longer schedule leaves the learning rate high and the weights under-converged.
+The schedule length was **measured, not chosen**. A first run scheduled 120
+epochs with `patience: 40`: validation fitness peaked at epoch 38, early
+stopping ended it at 78, and mosaic — scheduled to close at epoch 100 — never
+switched off. A 60-epoch schedule that runs to completion scored **0.7309
+mAP@50-95 against that run's 0.6685** on the same split and the same validation
+set. Six points, from a shorter run.
+
+Two mechanisms, pointing the same way:
+
+- The no-mosaic tail never happened. Mosaic closes at a *fixed* epoch
+  (`epochs - close_mosaic`), and the early-stopper knows nothing about that
+  boundary, so a run that stops early simply never finishes on the real image
+  distribution it is evaluated on.
+- Cosine decay only anneals to `lr0 * lrf` if the final epoch is reached.
+  Stopping at 78 of 120 leaves the learning rate an order of magnitude too high
+  and the weights under-converged.
+
+The general lesson, and the one worth stating in a review: **complete a short
+schedule rather than truncate a long one.** Early stopping is a safety net, not
+a scheduling strategy — when it fires, it silently cancels every
+end-of-training mechanism the recipe depends on.
 
 ### Loss
 
