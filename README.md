@@ -325,8 +325,46 @@ mAP. The 0.25 threshold is used only for human-facing output.
 Selected automatically, not by hand: every validation image is matched
 prediction-to-ground-truth exactly as the metric does (greedy, highest
 confidence first, IoU ≥ 0.5), ranked by per-image F1, and the best and worst six
-rendered. Each failure is attributed to a cause — missed object, false positive,
-wrong class, or loose box — so the report can say *why* the model loses points.
+rendered. A diversity constraint keeps the six from being six consecutive frames
+of one scene, which is what naive ranking returns. Each failure is attributed to
+a cause — missed object, false positive, wrong class, or loose box — so the
+report can say *why* the model loses points.
+
+![bad examples](reports/figures/qualitative_bad.png)
+
+**Error profile** (confidence ≥ 0.25, mean per-image F1 **0.922**):
+
+| | count |
+|---|---:|
+| true positive | 504 |
+| false positive | 38 |
+| — of which wrong class | **0** |
+| — of which loose box | 1 |
+| missed object | 18 |
+
+**Zero wrong-class errors.** The model never confuses one of the seven classes
+for another; every error is about *presence* or *placement*. For a set holding
+both `screen` and `clock` — wall-mounted rectangles at similar scale — that is a
+stronger result than the headline mAP conveys.
+
+**Several of the worst images are annotation gaps, not model failures.**
+Inspecting the six lowest-F1 frames, at least three false positives are objects
+that are genuinely present and simply unlabelled: an exit sign found at 0.81
+confidence with no ground-truth box in `frame_s5_133`, a printed exit sign in
+`frame_s4_172`, and two chairs in a row of five where only three are annotated
+in `frame_s3_966`. The dataset was built to be *fast to annotate* — that is the
+subject of the source paper — and incomplete labelling is the expected cost.
+
+This changes how the metric should be read: some of the 38 false positives
+penalise the model for being right, so the reported mAP is a mild
+**under**-estimate. It also explains the asymmetry — 38 false positives against
+only 18 misses. A model that genuinely over-predicted would also show
+wrong-class confusions, and there are none.
+
+The genuine failures are long-range: `frame_s4_187` misses a `screen` and a
+`clock` perhaps 30 px across at the far end of a lobby. That is consistent with
+`screen` being the weakest class, and with the size breakdown — medium objects
+score 0.66 against 0.78 for large.
 
 ### Class imbalance
 
