@@ -16,6 +16,7 @@ incomplete archive silently.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import zipfile
 from pathlib import Path
@@ -55,12 +56,58 @@ def _iter_files(path: Path):
         yield item
 
 
+def verify_primary_run() -> list[str]:
+    """Refuse to package a submission built from a secondary (ablation) run.
+
+    This exact mistake shipped twice: a leakage-ablation run overwrote
+    weights/best.pt, predictions/ and reports/ with the model trained on the
+    LEAKY random split, while the numbers everyone had read came from the
+    grouped run. Nothing in the artefacts announced the swap -- the zip looked
+    complete and was silently describing a different model.
+
+    metrics.json records which split produced it, so the check is cheap and
+    catches the whole class of error.
+    """
+    problems: list[str] = []
+    metrics_path = REPO_ROOT / "reports" / "metrics.json"
+    if not metrics_path.exists():
+        return ["reports/metrics.json missing -- run train.py before packaging"]
+
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    dataset = metrics.get("dataset")
+    if dataset != "grouped":
+        problems.append(
+            f"reports/metrics.json describes the '{dataset}' split, not 'grouped'. "
+            "A secondary run has overwritten the primary results. Re-run "
+            "`python train.py --config configs/default.yaml --dataset grouped`, "
+            "then regenerate predictions/, before packaging. "
+            "(Secondary runs must be given --tag so they write to suffixed paths.)"
+        )
+
+    # The shipped checkpoint should be at least as new as the metrics that
+    # describe it; an older one means something rewrote the report afterwards.
+    weights = REPO_ROOT / "weights" / "best.pt"
+    if weights.exists() and weights.stat().st_mtime < metrics_path.stat().st_mtime - 3600:
+        problems.append(
+            "weights/best.pt is over an hour older than reports/metrics.json -- "
+            "the checkpoint and the reported metrics may come from different runs."
+        )
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "submission.zip")
     parser.add_argument("--allow-missing", action="store_true",
                         help="package anyway when required items are absent")
     args = parser.parse_args()
+
+    problems = verify_primary_run()
+    if problems and not args.allow_missing:
+        print("error: refusing to package -- the artefacts are inconsistent:", file=sys.stderr)
+        for problem in problems:
+            print(f"  - {problem}", file=sys.stderr)
+        return 1
 
     missing = [
         name for name, required in INCLUDE

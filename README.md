@@ -21,6 +21,22 @@ Metrics are computed with `pycocotools` against COCO-format ground truth, at
 confidence 0.001 so the precision–recall curve is not truncated — not read out
 of the training framework's own validation loop.
 
+YOLO11s, 960 px, 60 epochs, leak-free grouped split:
+
+| class | val inst. | val AP@50 | val AP@50-95 | test inst. | test AP@50 | test AP@50-95 |
+|---|---:|---:|---:|---:|---:|---:|
+| chair | 188 | 0.9992 | 0.9076 | 91 | 0.9108 | 0.6507 |
+| clock | 20 | 0.9312 | 0.7491 | 25 | 1.0000 | 0.8075 |
+| exit | 57 | 0.9980 | 0.7503 | 36 | 1.0000 | 0.8471 |
+| fireextinguisher | 207 | 0.9967 | 0.7682 | 175 | 0.9957 | 0.8179 |
+| printer | 19 | 0.9210 | 0.6495 | 19 | 0.6592 | 0.4681 |
+| screen | 15 | 0.9093 | 0.6415 | 32 | 0.6017 | 0.4504 |
+| trashbin | 16 | 0.8895 | 0.6500 | 12 | 0.8775 | 0.5924 |
+| **all (macro)** | **522** | **0.9493** | **0.7309** | **390** | **0.8636** | **0.6620** |
+
+Mean per-image F1 at confidence 0.25 is **0.922**, over 504 true positives,
+38 false positives (0 of them a wrong class) and 18 missed objects.
+
 > **Note on rare classes.** `printer` and `screen` have 43 and 68 training boxes
 > respectively. Their per-class AP is reported, but is estimated from ~15–19
 > validation instances and is correspondingly noisy. The whole-set mAP is the

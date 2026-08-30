@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 
 REPO_URL = "https://github.com/zaiter93/indoor-object-detection"
+REVISION = 2  # keep in step with indoor_det.NOTEBOOK_REVISION
 NOTEBOOK_PATH = Path(__file__).resolve().parents[1] / "notebooks" / "colab_train_eval.ipynb"
 
 
@@ -83,10 +84,35 @@ CELLS = [
         f'REPO_URL = "{REPO_URL}"',
         'REPO_DIR = Path("/content/indoor-object-detection")',
         "",
+        "# Bumped whenever these cells change; checked against the repo in the next",
+        "# cell. Colab keeps the notebook in your browser tab, not in the cloned",
+        "# repo, so stale cells can silently run against fresh code.",
+        f"NOTEBOOK_REVISION = {REVISION}",
+        "",
         "if not REPO_DIR.exists():",
         "    !git clone --depth 1 $REPO_URL {REPO_DIR}",
         "os.chdir(REPO_DIR)",
         "print('working directory:', Path.cwd())",
+    ),
+    code(
+        "import sys",
+        "sys.path.insert(0, 'src')",
+        "from indoor_det import NOTEBOOK_REVISION as REPO_REVISION",
+        "",
+        "if NOTEBOOK_REVISION != REPO_REVISION:",
+        "    print('=' * 72)",
+        "    print(f'STALE NOTEBOOK: these cells are revision {NOTEBOOK_REVISION}, but the')",
+        "    print(f'repository expects revision {REPO_REVISION}.')",
+        "    print()",
+        "    print('Deleting the runtime refreshes the cloned code but NOT this notebook:')",
+        "    print('the cells live in your browser tab / Drive copy. Open the current')",
+        "    print('notebook fresh from GitHub and run again:')",
+        "    print('  https://colab.research.google.com/github/zaiter93/indoor-object-detection'",
+        "          '/blob/master/notebooks/colab_train_eval.ipynb')",
+        "    print('=' * 72)",
+        "    raise SystemExit('stale notebook -- see the message above')",
+        "",
+        "print(f'notebook revision {NOTEBOOK_REVISION} matches the repository')",
     ),
     code(
         "# Colab already ships a CUDA build of torch; installing it again wastes "
@@ -306,10 +332,44 @@ NOTEBOOK = {
 }
 
 
+def validate(notebook: dict) -> None:
+    """Check every code cell is syntactically valid Python before writing.
+
+    A generated notebook is easy to break subtly -- an escape sequence that
+    collapses into a real newline turns a string literal into a syntax error
+    that only surfaces when the cell runs, an hour into a Colab session. Parsing
+    each cell here costs nothing and catches it at generation time.
+
+    IPython line magics (``!cmd``, ``%cmd``) are not valid Python, so they are
+    replaced with ``pass`` at the same indentation before parsing.
+    """
+    import ast
+
+    failures = []
+    for index, cell in enumerate(notebook["cells"]):
+        if cell["cell_type"] != "code":
+            continue
+        source = "".join(cell["source"])
+        neutralised = "\n".join(
+            (line[: len(line) - len(line.lstrip())] + "pass")
+            if line.lstrip().startswith(("!", "%"))
+            else line
+            for line in source.splitlines()
+        )
+        try:
+            ast.parse(neutralised)
+        except SyntaxError as error:
+            failures.append(f"  cell {index}: {error}")
+
+    if failures:
+        raise SystemExit("Generated notebook has invalid cells:\n" + "\n".join(failures))
+
+
 def main() -> None:
+    validate(NOTEBOOK)
     NOTEBOOK_PATH.parent.mkdir(parents=True, exist_ok=True)
     NOTEBOOK_PATH.write_text(json.dumps(NOTEBOOK, indent=1), encoding="utf-8")
-    print(f"wrote {NOTEBOOK_PATH} ({len(CELLS)} cells)")
+    print(f"wrote {NOTEBOOK_PATH} ({len(CELLS)} cells, all code cells parse)")
 
 
 if __name__ == "__main__":
