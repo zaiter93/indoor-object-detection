@@ -10,7 +10,7 @@ data/processed/
 runs/
 *.pt
 !weights/best.pt
-predictions/
+predictions/          # 459 files / ~40 MB; ships in submission.zip, not in the repo
 
 # Python
 __pycache__/
@@ -32,11 +32,11 @@ submission.zip
 # Reference paper (kept locally, not part of the deliverable)
 *.pdf
 
-# Results from a training run. Committed only after the real Colab run --
-# never from the local 2-epoch smoke test, whose numbers are meaningless.
-reports/metrics.json
-reports/results.md
-reports/figures/qualitative_*.png
+# Results from a training run are TRACKED once published from a finished Colab
+# run via scripts/publish_results.py -- the README links to them, so ignoring
+# them leaves broken links on GitHub. They are not ignored; this note exists so
+# nobody re-adds them. Never commit the local smoke test's output: its numbers
+# are meaningless and it has overwritten the real report before.
 
 # Configs generated at runtime (ablation variants, ad-hoc checks)
 configs/_*.yaml

@@ -148,6 +148,7 @@ To reproduce the smoke test on a small GPU:
 ├── scripts/
 │   ├── make_notebook.py       # generates the Colab notebook
 │   ├── run_checks.py          # asserts the dataset invariants (16 checks)
+│   ├── publish_results.py     # lifts a finished run's results out of submission.zip
 │   ├── setup_github.sh        # creates the repo + dataset release
 │   └── package_submission.py  # builds submission.zip
 ├── notebooks/colab_train_eval.ipynb
